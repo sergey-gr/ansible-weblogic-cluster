@@ -1,0 +1,1 @@
+Folder should contain additions (playbooks, roles, etc.) to provision default cluster configuration with new, specific features or configuration.

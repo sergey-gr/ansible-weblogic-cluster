@@ -1,0 +1,7 @@
+---
+- name: Update Weblogic Cluster
+  hosts: wl_admin
+  gather_facts: true
+  become: true
+  roles:
+    - { role: update/ssl, tags: ['never', 'ssl'] }

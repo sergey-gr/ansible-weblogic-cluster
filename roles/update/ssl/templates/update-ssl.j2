@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+# WebLogic Server Version: 12.2.1.3.0, Jython 2.2.1.final.0
+import sys
+
+# redirect wlst's own output to null, print lines in the script itself
+redirect('/dev/null', 'false')
+
+# Connect to WebLogic admin server
+connect('{{ weblogic_admin }}', '{{ weblogic_admin_pass}}', '{{ hostvars[groups['wl_admin'][0]]['ansible_ssh_host'] }}:{{ admin_server_port }}')
+
+# Check if the connection is established.
+if connected == "false":
+    print("Failed to connect to admin server")
+    sys.exit(1)
+
+# All managed servers
+servers = cmo.getServers()
+
+{% if ms_ssl_keystore is sameas true %}
+edit()
+startEdit()
+
+for server in servers:
+    ms = server.getName()
+    if ms != 'AdminServer':
+        # Attach SSL Keystore
+        cd('/Servers/' + ms)
+        cmo.setCustomIdentityKeyStoreFileName('certs/{{ ms_ssl_keystore_file }}')
+        cmo.setCustomIdentityKeyStorePassPhrase('{{ ms_ssl_keystore_pass }}')
+
+        # Attach SSL Identity
+        cd('/Servers/' + ms + '/SSL/'+ ms)
+        cmo.setServerPrivateKeyAlias('{{ ms_ssl_keystore_alias}}')
+        cmo.setServerPrivateKeyPassPhrase('{{ ms_ssl_keystore_pass }}')
+
+save()
+activate()
+
+# Switch runtime to domainRuntime
+domainRuntime()
+
+for server in servers:
+    ms = server.getName()
+    if ms != 'AdminServer':
+        # Restarting SSL...
+        cd('/ServerLifeCycleRuntimes/' + ms)
+        serverState = get('State')
+        if (serverState != "SHUTDOWN"):
+            print('Restarting SSL for: ' + ms)
+            cd('/ServerRuntimes/' + ms)
+            cmo.restartSSLChannels()
+
+{% endif %}
+
+disconnect()
+exit()

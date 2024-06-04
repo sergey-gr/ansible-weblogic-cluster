@@ -1,0 +1,7 @@
+---
+- name: Reset Weblogic Cluster
+  hosts: cluster
+  gather_facts: true
+  become: true
+  roles:
+    - { role: reset, tags: reset }

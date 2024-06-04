@@ -1,0 +1,13 @@
+{
+    "editor.defaultFormatter": "vscode.git",
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+    },
+    "[yaml]":  {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "none"
+	},
+    "markdown.extension.toc.slugifyMode": "gitea",
+    "markdown.extension.tableFormatter.normalizeIndentation": true,
+}

@@ -1,0 +1,32 @@
+---
+# ==> Copy keystore
+- name: Copy new keystore to shared keystore folder
+  copy: src={{ ms_ssl_keystore_file }} dest='{{ domain_home }}/certs' owner={{ oracle_user }} group={{ oracle_group }}
+  args:
+    force: no
+  when: ms_ssl is sameas true
+        and ms_ssl_keystore is sameas true
+        and ms_ssl_keystore_file|length > 0
+
+# ==> Create tmp directory
+- name: Create tmp directory
+  file:
+    state: directory
+    path: "{{ tmp_dir }}"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+# ==> Copy scripts
+- name: Copy keystore update script
+  template:
+    src: update-ssl.j2
+    dest: "{{ tmp_dir }}/update-ssl.py"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+# ==> Execute script
+- name: Execute keystore update script
+  become: true
+  become_user: "{{ oracle_user }}"
+  shell: "{{ wls_bin }}/wlst.sh -skipWLSModuleScanning {{ tmp_dir }}/update-ssl.py"
+  throttle: 1

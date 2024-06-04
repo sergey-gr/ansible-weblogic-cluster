@@ -1,0 +1,23 @@
+---
+- name: Preparing servers for WebLogic
+  hosts: cluster
+  become: true
+  gather_facts: true
+  roles:
+    - { role: wls-prep, tags: prereq }
+    - { role: jdk, tags: jdk }
+
+- name: Installing WebLogic and creating a domain
+  hosts: wl_admin
+  become: true
+  roles:
+    - { role: fmw, tags: fmw }
+    - { role: domain, tags: domain }
+    - { role: cluster, tags: cluster, when: ms_cluster is sameas true }
+
+- name: Creating Node Manager and Managed Server
+  hosts: wl_node
+  become: true
+  roles:
+    - {role: node-manager, tags: node-manager }
+    - {role: managed, tags: managed }

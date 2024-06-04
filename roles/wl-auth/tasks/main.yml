@@ -1,0 +1,25 @@
+# ==> Copy scripts
+- name: Copy key and config creation script
+  template: src=genKeyNConfig.py dest={{ tmp_dir }} owner={{ oracle_user }} group={{ oracle_group }}
+  when: inventory_hostname in groups['wl_admin']
+
+# ==> Generate files
+- name: Execute key and config file creation script
+  become: true
+  become_user: '{{ oracle_user }}'
+  shell: "{{ wls_bin }}/wlst.sh -skipWLSModuleScanning {{ tmp_dir }}/genKeyNConfig.py"
+  when: inventory_hostname in groups['wl_admin']
+
+# ==> Set permissions
+- name: Change permissions for config file.
+  file: path={{ domain_home }}/config/{{ oracle_user }}-WebLogicConfig.properties owner={{ oracle_user }} group={{ oracle_group }} mode=0400
+
+- name: Change permissions for key file.
+  file: path={{ domain_home }}/config/{{ oracle_user }}-WebLogicKey.properties owner={{ oracle_user }} group={{ oracle_group }} mode=0400
+
+# ==> Set environment variables
+- name: Add 'userConfigFile' environment variariables in .bashrc
+  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export userConfigFile={{ domain_home }}/config/{{ oracle_user }}-WebLogicConfig.properties'
+
+- name: Add 'userKeyFile' environment variariables in .bashrc
+  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export userKeyFile={{ domain_home }}/config/{{ oracle_user }}-WebLogicKey.properties'

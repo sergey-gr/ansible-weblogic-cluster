@@ -1,0 +1,3 @@
+# WebLogic secrets
+weblogic_admin: 'weblogic'
+weblogic_admin_pass: 'welcome1'
